@@ -246,6 +246,20 @@ copyGenBtn.addEventListener("click", async () => {
     setTimeout(() => (copyGenBtn.textContent = "Copy"), 1500);
   }
 });
+// ====== GUIDE MODAL ======
+showGuide.addEventListener("click", () => {
+  guideModal.classList.remove("hidden");
+  setTimeout(() => guideSheet.classList.add("open"), 10);
+});
+
+function closeGuideModal() {
+  guideSheet.classList.remove("open");
+  setTimeout(() => guideModal.classList.add("hidden"), 300);
+}
+
+closeGuide.addEventListener("click", closeGuideModal);
+closeGuide2.addEventListener("click", closeGuideModal);
+guideBackdrop.addEventListener("click", closeGuideModal);
 
 // ====== INIT ======
 updateRequirements("");
