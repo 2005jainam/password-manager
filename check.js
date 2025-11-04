@@ -43,7 +43,7 @@ const commonPasswords = [
 // ====== FORM HANDLER ======
 const form = document.getElementById("pw-form");
 form.addEventListener("submit", (event) => {
-  event.preventDefault(); // prevent reload & URL exposure
+  event.preventDefault();
 
   const password = passwordInput.value.trim();
   if (!password) {
@@ -52,7 +52,6 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
-  // Validate requirements
   const allMet = checkAllRequirements(password);
   if (!allMet) {
     feedback.style.color = "#ef4444";
@@ -60,7 +59,6 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
-  // Block common passwords
   const isCommon = commonPasswords.some(p => password.toLowerCase().includes(p));
   if (isCommon) {
     feedback.style.color = "#ef4444";
@@ -68,18 +66,14 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
-  // If valid — show success feedback
   const { score, feedbackMsg, timeToCrack } = evaluatePassword(password);
   updateStrengthBar(score);
   feedback.style.color = "#22c55e";
   feedback.textContent = "✅ Successfully submitted! " + feedbackMsg;
   crackTimeValue.textContent = timeToCrack || "—";
 
-  // Privacy measure: clear the input
   passwordInput.value = "";
   updateRequirements("");
-
-  // Show success alert
   alert("✅ Password submitted successfully! (Not stored or sent)");
 });
 
@@ -87,26 +81,24 @@ form.addEventListener("submit", (event) => {
 passwordInput.addEventListener("input", () => {
   const password = passwordInput.value;
   const { score, feedbackMsg, timeToCrack } = evaluatePassword(password);
-
   updateStrengthBar(score);
   feedback.style.color = "#333";
   feedback.textContent = feedbackMsg;
   crackTimeValue.textContent = timeToCrack || "—";
-
   updateRequirements(password);
 });
 
-// ====== REQUIREMENTS CHECK ======
+// ====== REQUIREMENTS ======
 function checkAllRequirements(password) {
-  const minLength = password.length >= 8;
-  const upper = /[A-Z]/.test(password);
-  const lower = /[a-z]/.test(password);
-  const number = /[0-9]/.test(password);
-  const special = /[^A-Za-z0-9]/.test(password);
-  return minLength && upper && lower && number && special;
+  return (
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    /[^A-Za-z0-9]/.test(password)
+  );
 }
 
-// ====== UPDATE REQUIREMENTS ======
 function updateRequirements(password) {
   markRequirement(reqLength, password.length >= 8);
   markRequirement(reqUpper, /[A-Z]/.test(password));
@@ -123,17 +115,13 @@ function markRequirement(el, met) {
 // ====== PASSWORD EVALUATION ======
 function evaluatePassword(password) {
   if (!password) return { score: 0, feedbackMsg: "", timeToCrack: "" };
+  let score = 0, feedbackMsg = "";
 
-  let score = 0;
-  let feedbackMsg = "";
-
-  // Length
   if (password.length >= 16) score += 40;
   else if (password.length >= 12) score += 30;
   else if (password.length >= 8) score += 15;
   else score += 5;
 
-  // Variety
   const hasUpper = /[A-Z]/.test(password);
   const hasLower = /[a-z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
@@ -141,14 +129,12 @@ function evaluatePassword(password) {
   const variety = [hasUpper, hasLower, hasNumber, hasSpecial].filter(Boolean).length;
   score += variety * 10;
 
-  // Common pattern penalty
   const isCommon = commonPasswords.some(p => password.toLowerCase().includes(p));
   if (isCommon) {
     score -= 25;
     feedbackMsg = "⚠️ Avoid common passwords or dictionary words.";
   }
 
-  // Bonus for very strong passwords
   if (password.length >= 20 && variety >= 3) score += 15;
   score = Math.max(0, Math.min(score, 100));
 
@@ -165,13 +151,10 @@ function evaluatePassword(password) {
 
 // ====== CRACK TIME ESTIMATION ======
 function estimateCrackTime(password) {
-  if (!password) return "";
-
   const hasUpper = /[A-Z]/.test(password);
   const hasLower = /[a-z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
   const hasSpecial = /[^A-Za-z0-9]/.test(password);
-
   let pool = 0;
   if (hasLower) pool += 26;
   if (hasUpper) pool += 26;
@@ -180,8 +163,8 @@ function estimateCrackTime(password) {
   if (pool === 0) pool = 26;
 
   const entropy = password.length * Math.log2(pool);
-  const G = 1e10; // guesses per second
-  const seconds = Math.pow(2, entropy - 1) / G;
+  const guessesPerSecond = 1e10;
+  const seconds = Math.pow(2, entropy - 1) / guessesPerSecond;
   return formatDuration(seconds);
 }
 
@@ -196,7 +179,7 @@ function formatDuration(seconds) {
   return fmt(seconds / YEAR) + " year";
 }
 
-// ====== STRENGTH BAR COLOR ======
+// ====== STRENGTH BAR ======
 function updateStrengthBar(score) {
   strengthBar.style.width = score + "%";
   if (score < 30) strengthBar.style.backgroundColor = "#ef4444";
@@ -246,6 +229,21 @@ copyGenBtn.addEventListener("click", async () => {
     setTimeout(() => (copyGenBtn.textContent = "Copy"), 1500);
   }
 });
+
+// ====== EYE TOGGLES (Fixed) ======
+toggleVisibility.addEventListener("click", () => {
+  const isHidden = passwordInput.type === "password";
+  passwordInput.type = isHidden ? "text" : "password";
+  eyeOpen.classList.toggle("hidden", !isHidden);
+  eyeClosed.classList.toggle("hidden", isHidden);
+});
+
+toggleGenVisibility.addEventListener("click", () => {
+  const isOpen = !genEyeOpen.classList.contains("hidden");
+  genEyeOpen.classList.toggle("hidden", isOpen);
+  genEyeClosed.classList.toggle("hidden", !isOpen);
+});
+
 // ====== GUIDE MODAL ======
 showGuide.addEventListener("click", () => {
   guideModal.classList.remove("hidden");
