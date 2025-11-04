@@ -15,7 +15,6 @@ const reqSpecial = document.getElementById("req-special");
 const generateBtn = document.getElementById("generate-password");
 const generatedRow = document.getElementById("generated-row");
 const generatedField = document.getElementById("generated-password");
-const toggleGenVisibility = document.getElementById("toggle-gen-visibility");
 const copyGenBtn = document.getElementById("copy-gen");
 
 // Guide modal
@@ -26,12 +25,10 @@ const guideSheet = document.getElementById("guide-sheet");
 const closeGuide = document.getElementById("close-guide");
 const closeGuide2 = document.getElementById("close-guide-2");
 
-// Eye toggles
+// Eye toggle
 const toggleVisibility = document.getElementById("toggle-visibility");
 const eyeOpen = document.getElementById("eye-open");
 const eyeClosed = document.getElementById("eye-closed");
-const genEyeOpen = document.getElementById("gen-eye-open");
-const genEyeClosed = document.getElementById("gen-eye-closed");
 
 // ====== COMMON PASSWORD LIST ======
 const commonPasswords = [
@@ -230,7 +227,7 @@ copyGenBtn.addEventListener("click", async () => {
   }
 });
 
-// ====== EYE TOGGLES (Fixed) ======
+// ====== EYE TOGGLE ======
 toggleVisibility.addEventListener("click", () => {
   const isHidden = passwordInput.type === "password";
   passwordInput.type = isHidden ? "text" : "password";
@@ -238,23 +235,22 @@ toggleVisibility.addEventListener("click", () => {
   eyeClosed.classList.toggle("hidden", isHidden);
 });
 
-toggleGenVisibility.addEventListener("click", () => {
-  const isOpen = !genEyeOpen.classList.contains("hidden");
-  genEyeOpen.classList.toggle("hidden", isOpen);
-  genEyeClosed.classList.toggle("hidden", !isOpen);
-});
-
-// ====== GUIDE MODAL ======
-showGuide.addEventListener("click", () => {
+// ====== GUIDE MODAL (FIXED) ======
+function openGuideModal() {
   guideModal.classList.remove("hidden");
-  setTimeout(() => guideSheet.classList.add("open"), 10);
-});
+  setTimeout(() => {
+    guideBackdrop.classList.add("visible");
+    guideSheet.classList.add("open");
+  }, 10);
+}
 
 function closeGuideModal() {
+  guideBackdrop.classList.remove("visible");
   guideSheet.classList.remove("open");
   setTimeout(() => guideModal.classList.add("hidden"), 300);
 }
 
+showGuide.addEventListener("click", openGuideModal);
 closeGuide.addEventListener("click", closeGuideModal);
 closeGuide2.addEventListener("click", closeGuideModal);
 guideBackdrop.addEventListener("click", closeGuideModal);
